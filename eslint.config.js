@@ -21,6 +21,7 @@ export default defineConfig([
     plugins: {
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
+      base: "/HalloweenEscapeRoom",
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
@@ -31,5 +32,4 @@ export default defineConfig([
       ],
     },
   },
-  {base: "/HalloweenEscapeRoom"},
 ])
