@@ -4,7 +4,10 @@ import './ImageCell.css';
 const ImageCell = ({ label, src, boxes, clickedBoxes, onBoxClick }) => {
   return (
     <div className="image-cell">
-      <div className="image-wrapper">
+      <div 
+        className="image-wrapper"
+        onClick={() => onBoxClick('wrong')} // wrong click on background
+      >
         <img src={src} alt={label} className="game-image" />
         {boxes.map((box) => (
           <div
@@ -16,7 +19,10 @@ const ImageCell = ({ label, src, boxes, clickedBoxes, onBoxClick }) => {
               width: box.width,
               height: box.height,
             }}
-            onClick={() => onBoxClick(box.id)}
+            onClick={(e) => {
+              e.stopPropagation(); // prevent triggering wrong click
+              onBoxClick(box.id);  // correct click
+            }}
           />
         ))}
       </div>

@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ImageCell from './components/ImageCell';
 import './App.css';
 
@@ -15,14 +15,54 @@ const baseBoxes = [
   { id: 9, top: '18%', left: '48%', width: '5%', height: '7%' },
 ];
 
+const TOTAL_TIME = 30; // seconds
+const TOTAL_DIFFERENCES = baseBoxes.length;
+
 function App() {
   const [clickedBoxes, setClickedBoxes] = useState([]);
+  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
+  const [gameStatus, setGameStatus] = useState('playing'); // 'playing', 'won', 'failed'
+
+  useEffect(() => {
+    if (gameStatus !== 'playing') return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setGameStatus('failed');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [gameStatus]);
+
+  useEffect(() => {
+    if (clickedBoxes.length === TOTAL_DIFFERENCES && gameStatus === 'playing') {
+      setGameStatus('won');
+    }
+  }, [clickedBoxes, gameStatus]);
 
   const handleBoxClick = (id) => {
-    if (!clickedBoxes.includes(id)) {
+    if (gameStatus !== 'playing') return;
+
+    if (id === 'wrong') {
+      setTimeLeft(prev => Math.max(prev - 2, 0));
+      return;
+    }
+
+    const isCorrect = baseBoxes.some(box => box.id === id);
+
+    if (isCorrect && !clickedBoxes.includes(id)) {
       setClickedBoxes([...clickedBoxes, id]);
+      setTimeLeft(prev => Math.min(prev + 5, TOTAL_TIME));
     }
   };
+
+  const progressPercent = (timeLeft / TOTAL_TIME) * 100;
 
   return (
     <div className="container">
@@ -43,7 +83,23 @@ function App() {
         />
       </div>
       <div className="bottom-row">
-        <p>{clickedBoxes.length} / 9 differences found</p>
+        {gameStatus === 'playing' && (
+          <>
+            <p>{clickedBoxes.length} / {TOTAL_DIFFERENCES} differences found</p>
+            <div className="timer-container">
+              <div className="timer-bar" style={{ width: `${progressPercent}%` }} />
+              <div className="timer-label">{timeLeft}s remaining</div>
+            </div>
+          </>
+        )}
+
+        {gameStatus === 'won' && (
+          <div className="game-result success">🎉 You found all the differences! You win!</div>
+        )}
+
+        {gameStatus === 'failed' && (
+          <div className="game-result fail">⏰ Time’s up! You failed. Try again!</div>
+        )}
       </div>
     </div>
   );
