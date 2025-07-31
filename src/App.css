@@ -88,3 +88,45 @@ body, html, #root {
   overflow: hidden;
   margin-bottom: 20px; /* ← this adds spacing below the images */
 }
+
+.indicators {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.indicator {
+  animation: float 1.2s ease-out forwards;
+  font-size: 2rem;
+  font-weight: bold;
+  opacity: 0;
+  position: absolute;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+}
+
+.floating-indicator {
+  transform: translate(-50%, -50%);
+  z-index: 999;
+}
+
+@keyframes floatUp {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50px);
+  }
+}

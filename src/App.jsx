@@ -17,11 +17,14 @@ const baseBoxes = [
 
 const TOTAL_TIME = 30; // seconds
 const TOTAL_DIFFERENCES = baseBoxes.length;
+const rightAnswer = 5
+const wrongAnswer = 2
 
 function App() {
   const [clickedBoxes, setClickedBoxes] = useState([]);
   const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
   const [gameStatus, setGameStatus] = useState('playing'); // 'playing', 'won', 'failed'
+  const [indicators, setIndicators] = useState([]);
 
   useEffect(() => {
     if (gameStatus !== 'playing') return;
@@ -46,21 +49,39 @@ function App() {
     }
   }, [clickedBoxes, gameStatus]);
 
-  const handleBoxClick = (id) => {
+  const handleBoxClick = (id, position) => {
     if (gameStatus !== 'playing') return;
 
+    const newIndicator = (text, color, position) => {
+      const indicatorId = Date.now() + Math.random(); // unique ID
+      setIndicators(prev => [...prev, { id: indicatorId, text, color, ...position }]);
+      setTimeout(() => {
+        setIndicators(prev => prev.filter(ind => ind.id !== indicatorId));
+      }, 1200); // match animation duration
+    };
+
+    // If it's explicitly marked wrong, show only red
     if (id === 'wrong') {
-      setTimeLeft(prev => Math.max(prev - 2, 0));
+      console.log('[WRONG] Clicked a wrong box at position:', position);
+      setTimeLeft(prev => Math.max(prev - wrongAnswer, 0));
+      newIndicator('–2s', 'red', position);
       return;
     }
 
+    // Only check if it's correct if not 'wrong'
     const isCorrect = baseBoxes.some(box => box.id === id);
 
     if (isCorrect && !clickedBoxes.includes(id)) {
-      setClickedBoxes([...clickedBoxes, id]);
-      setTimeLeft(prev => Math.min(prev + 5, TOTAL_TIME));
+      console.log('[CORRECT] Found a difference! Box ID:', id, 'at position:', position);
+      setClickedBoxes(prev => {
+        const updated = [...prev, id];
+        console.log('[STATE] Clicked boxes updated:', updated);
+        return updated;
+      });
+      setTimeLeft(prev => Math.min(prev + rightAnswer, TOTAL_TIME));
+      newIndicator('+5s', 'green', position);
     }
-  };
+  };  
 
   const progressPercent = (timeLeft / TOTAL_TIME) * 100;
 
@@ -73,6 +94,7 @@ function App() {
           boxes={baseBoxes}
           clickedBoxes={clickedBoxes}
           onBoxClick={handleBoxClick}
+          indicators={indicators} // ✅ pass it in
         />
         <ImageCell
           label="Right Image"
@@ -80,6 +102,7 @@ function App() {
           boxes={baseBoxes}
           clickedBoxes={clickedBoxes}
           onBoxClick={handleBoxClick}
+          indicators={indicators} // ✅ pass it in
         />
       </div>
       <div className="bottom-row">
@@ -89,6 +112,17 @@ function App() {
             <div className="timer-container">
               <div className="timer-bar" style={{ width: `${progressPercent}%` }} />
               <div className="timer-label">{timeLeft}s remaining</div>
+              <div className="indicators">
+                {indicators.map(ind => (
+                  <div
+                    key={ind.id}
+                    className="indicator"
+                    style={{ color: ind.color }}
+                  >
+                    {ind.text}
+                  </div>
+                ))}
+              </div>
             </div>
           </>
         )}

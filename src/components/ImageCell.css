@@ -23,14 +23,32 @@
 }
 
 .click-box {
+  z-index: 10;
   position: absolute;
-  cursor: pointer;
+  cursor: default;
   border: 2px solid transparent;
   transform: translate(-50%, -50%);
+  pointer-events: auto;
 }
 
 .click-box.clicked {
   border: 2px solid red;
   border-radius: 50%;
   background-color: rgba(255, 0, 0, 0.3);
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-40px);
+    opacity: 0;
+  }
+}
+
+.floating-indicator {
+  position: absolute;
+  white-space: nowrap;
 }

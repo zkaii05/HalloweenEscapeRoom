@@ -1,0 +1,38 @@
+/* src/components/FloatingIndicator.css */
+
+.floating-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: floatUpFade 1.2s ease-out forwards;
+    font-size: 2vw;
+    font-weight: bold;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.9;
+  }
+  
+  .floating-indicator.green {
+    color: #4caf50;
+  }
+  
+  .floating-indicator.red {
+    color: #f44336;
+  }
+  
+  @keyframes floatUpFade {
+    0% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+      transform: translate(-50%, -80%) scale(1.2);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -120%) scale(1);
+      opacity: 0;
+    }
+  }
+  
