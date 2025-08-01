@@ -25,6 +25,12 @@ function App() {
   const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
   const [gameStatus, setGameStatus] = useState('playing'); // 'playing', 'won', 'failed'
   const [indicators, setIndicators] = useState([]);
+  const [attempts, setAttempts] = useState(1);
+  const resetGame = () => {
+    setClickedBoxes([]);
+    setTimeLeft(TOTAL_TIME);
+    setGameStatus('playing');
+  };
 
   useEffect(() => {
     if (gameStatus !== 'playing') return;
@@ -34,6 +40,11 @@ function App() {
         if (prev <= 1) {
           clearInterval(timer);
           setGameStatus('failed');
+          if (prev <= 1) {
+            clearInterval(timer);
+            setGameStatus(attempts + 1 < 4 ? 'failed' : 'gameover');
+            return 0;
+          }
           return 0;
         }
         return prev - 1;
@@ -87,6 +98,9 @@ function App() {
 
   return (
     <div className="container">
+      <div className="headspace">
+  <p>Tries used: {attempts} / 3</p>
+</div>
       <div className="top-row">
         <ImageCell
           label="Left Image"
@@ -132,8 +146,21 @@ function App() {
         )}
 
         {gameStatus === 'failed' && (
-          <div className="game-result fail">⏰ Time’s up! You failed. Try again!</div>
+          <button
+            className="retry-button"
+            onClick={() => {
+              setAttempts(prev => prev + 1);
+              resetGame();
+            }}
+          >
+            ⏰ Time’s up! Press here to try again
+          </button>
         )}
+
+        {gameStatus === 'gameover' && (
+          <div className="game-result fail">🚫 No more tries left. Please ask NPC for help.</div>
+        )}
+
       </div>
     </div>
   );
