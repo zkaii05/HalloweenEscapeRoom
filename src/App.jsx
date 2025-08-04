@@ -179,7 +179,7 @@ function App() {
             )}
   
             {gameStatus === 'gameover' && (
-              <div className="game-result fail">🚫 No more tries left. Please refresh to start over.</div>
+              <div className="game-result fail">🚫 No more tries left. Please look for NPC for help.</div>
             )}
           </div>
         </>
