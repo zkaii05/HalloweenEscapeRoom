@@ -150,3 +150,51 @@ body, html, #root {
 .retry-button:hover {
   background-color: #cc0000;
 }
+
+.intro-screen {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.start-button {
+  padding: 10px 20px;
+  font-size: 18px;
+  margin-top: 20px;
+  cursor: pointer;
+  border: none;
+  background-color: #4caf50;
+  color: white;
+  border-radius: 8px;
+}
+
+.start-button:hover {
+  background-color: #388e3c;
+}
+
+.reveal-button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  font-size: 16px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.reveal-button:hover {
+  background-color: #45a049;
+}
+
+.clue-text {
+  margin-top: 10px;
+  font-size: 18px;
+  color: #ff9800;
+}
+
+.success-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
