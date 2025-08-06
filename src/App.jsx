@@ -31,20 +31,17 @@ function App() {
     setTimeLeft(TOTAL_TIME);
     setGameStatus('playing');
   };
+  const [showIntro, setShowIntro] = useState(true);
+  const [clueRevealed, setClueRevealed] = useState(false);
 
   useEffect(() => {
-    if (gameStatus !== 'playing') return;
+    if (showIntro || gameStatus !== 'playing') return;
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          setGameStatus('failed');
-          if (prev <= 1) {
-            clearInterval(timer);
-            setGameStatus(attempts + 1 < 4 ? 'failed' : 'gameover');
-            return 0;
-          }
+          setGameStatus(attempts + 1 < 4 ? 'failed' : 'gameover');
           return 0;
         }
         return prev - 1;
@@ -52,7 +49,7 @@ function App() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [gameStatus]);
+  }, [showIntro, gameStatus, attempts]);
 
   useEffect(() => {
     if (clickedBoxes.length === TOTAL_DIFFERENCES && gameStatus === 'playing') {
@@ -83,10 +80,8 @@ function App() {
     const isCorrect = baseBoxes.some(box => box.id === id);
 
     if (isCorrect && !clickedBoxes.includes(id)) {
-      console.log('[CORRECT] Found a difference! Box ID:', id, 'at position:', position);
       setClickedBoxes(prev => {
         const updated = [...prev, id];
-        console.log('[STATE] Clicked boxes updated:', updated);
         return updated;
       });
       setTimeLeft(prev => Math.min(prev + rightAnswer, TOTAL_TIME));
@@ -98,72 +93,100 @@ function App() {
 
   return (
     <div className="container">
-      <div className="headspace">
-  <p>Tries used: {attempts} / 3</p>
-</div>
-      <div className="top-row">
-        <ImageCell
-          label="Left Image"
-          src="/image-left.jpg"
-          boxes={baseBoxes}
-          clickedBoxes={clickedBoxes}
-          onBoxClick={handleBoxClick}
-          indicators={indicators} // ✅ pass it in
-        />
-        <ImageCell
-          label="Right Image"
-          src="/image-right.jpg"
-          boxes={baseBoxes}
-          clickedBoxes={clickedBoxes}
-          onBoxClick={handleBoxClick}
-          indicators={indicators} // ✅ pass it in
-        />
-      </div>
-      <div className="bottom-row">
-        {gameStatus === 'playing' && (
-          <>
-            <p>{clickedBoxes.length} / {TOTAL_DIFFERENCES} differences found</p>
-            <div className="timer-container">
-              <div className="timer-bar" style={{ width: `${progressPercent}%` }} />
-              <div className="timer-label">{timeLeft}s remaining</div>
-              <div className="indicators">
-                {indicators.map(ind => (
-                  <div
-                    key={ind.id}
-                    className="indicator"
-                    style={{ color: ind.color }}
-                  >
-                    {ind.text}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-
-        {gameStatus === 'won' && (
-          <div className="game-result success">🎉 You found all the differences! You win!</div>
-        )}
-
-        {gameStatus === 'failed' && (
+      {showIntro ? (
+        <div className="intro-screen">
+          <h1>🧠 Spot the Difference Game</h1>
+          <p>You have 3 tries to spot all {TOTAL_DIFFERENCES} differences between the two images.</p>
+          <ul>
+            <li>Click on areas you think are different.</li>
+            <li>Correct click: +5 seconds</li>
+            <li>Wrong click: -2 seconds</li>
+            <li>You have {TOTAL_TIME} seconds per attempt.</li>
+          </ul>
           <button
-            className="retry-button"
+            className="start-button"
             onClick={() => {
-              setAttempts(prev => prev + 1);
               resetGame();
+              setShowIntro(false);
             }}
           >
-            ⏰ Time’s up! Press here to try again
+            ▶ Start Game
           </button>
-        )}
+        </div>
+      ) : (
+        <>
+          <div className="headspace">
+            <p>Tries used: {attempts} / 3</p>
+          </div>
+  
+          <div className="top-row">
+            <ImageCell
+              label="Left Image"
+              src="/image-left.jpg"
+              boxes={baseBoxes}
+              clickedBoxes={clickedBoxes}
+              onBoxClick={handleBoxClick}
+              indicators={indicators}
+            />
+            <ImageCell
+              label="Right Image"
+              src="/image-right.jpg"
+              boxes={baseBoxes}
+              clickedBoxes={clickedBoxes}
+              onBoxClick={handleBoxClick}
+              indicators={indicators}
+            />
+          </div>
+  
+          <div className="bottom-row">
+            {gameStatus === 'playing' && (
+              <>
+                <p>{clickedBoxes.length} / {TOTAL_DIFFERENCES} differences found</p>
+                <div className="timer-container">
+                  <div className="timer-bar" style={{ width: `${progressPercent}%` }} />
+                  <div className="timer-label">{timeLeft}s remaining</div>
+                  <div className="indicators">
+                    {indicators.map(ind => (
+                      <div
+                        key={ind.id}
+                        className="indicator"
+                        style={{ color: ind.color }}
+                      >
+                        {ind.text}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
 
-        {gameStatus === 'gameover' && (
-          <div className="game-result fail">🚫 No more tries left. Please ask NPC for help.</div>
-        )}
-
-      </div>
+            {gameStatus === 'won' && (
+              <div className="game-result success">
+                <img src="/success.jpeg" alt="You win!" className="success-image" />
+              </div>
+            )}
+  
+            {gameStatus === 'failed' && (
+              <button
+                className="retry-button"
+                onClick={() => {
+                  setAttempts(prev => prev + 1);
+                  resetGame();
+                }}
+              >
+                ⏰ Time’s up! Press here to try again
+              </button>
+            )}
+  
+            {gameStatus === 'gameover' && (
+              <div className="game-result fail">🚫 No more tries left. Please look for NPC for help.</div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
+  
 }
 
 export default App;
