@@ -15,6 +15,7 @@ body, html, #root {
   display: flex;
   justify-content: space-between;
   height: 100%;
+  overflow: visible; /* change this from hidden */
 }
 
 .bottom-row {
@@ -94,14 +95,8 @@ body, html, #root {
   bottom: 100px;
   left: 50%;
   transform: translateX(-50%);
-}
-
-.indicator {
-  animation: float 1.2s ease-out forwards;
-  font-size: 2rem;
-  font-weight: bold;
-  opacity: 0;
-  position: absolute;
+  overflow: visible !important; /* <- ensure overflow is visible */
+  z-index: 10; /* ensures it's above other elements */
 }
 
 @keyframes float {
@@ -197,4 +192,156 @@ body, html, #root {
   height: auto;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.game-result.loading {
+  font-size: 1.5rem;
+  color: #666;
+  padding: 20px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #333;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 10px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #444;
+  line-height: 1.4;
+}
+
+/* Grey-out effect */
+.game-wrapper.dimmed {
+  position: relative;
+  pointer-events: none; /* Prevent clicks */
+  filter: brightness(0.5); /* Dim effect */
+  transition: filter 0.3s ease;
+}
+
+/* Allow overlay elements to still appear fully above */
+.game-result.loading {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 999;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.password-prompt {
+  background: white;
+  border: 2px solid #ddd;
+  padding: 20px;
+  max-width: 300px;
+  margin: 20px auto;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.password-prompt input {
+  width: 80%;
+  padding: 8px;
+  font-size: 18px;
+  margin-top: 10px;
+}
+
+.password-prompt button {
+  margin-top: 10px;
+  padding: 6px 12px;
+}
+
+.password-prompt .error {
+  color: red;
+  margin-top: 8px;
+}
+
+.password-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.clue-button {
+  background-color: #eee;
+  padding: 6px 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.clue-text {
+  margin-top: 10px;
+  font-style: italic;
+  color: #555;
+}
+.password-input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.password-input {
+  font-size: 1.5rem;
+  width: 200px;
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  color: #333;
+}
+
+.password-input::placeholder {
+  color: #999;
+  transition: opacity 0.2s ease;
+}
+
+.password-input:focus::placeholder {
+  opacity: 0;
+}
+
+.digit-count {
+  font-size: 1rem;
+  color: #666;
+}
+.clue-video-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.clue-video-container {
+  position: relative;
+  max-width: 80%;
+  max-height: 80%;
+}
+
+.clue-video-container video {
+  width: 100%;
+  height: auto;
+  background: black;
+  pointer-events: none; /* disables interaction */
 }
