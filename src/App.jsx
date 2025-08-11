@@ -33,11 +33,7 @@ function App() {
     setGameStatus('playing');
   };
   const [showIntro, setShowIntro] = useState(true);
-  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
-  const [passwordInput, setPasswordInput] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [showClue, setShowClue] = useState(false);
-  const [showClueVideo, setShowClueVideo] = useState(false);
+  const [clueRevealed, setClueRevealed] = useState(false);
 
   useEffect(() => {
     if (showIntro || gameStatus !== 'playing') return;
@@ -171,11 +167,12 @@ function App() {
                 </div>
               )}
 
-              {gameStatus === 'failed' && !showPasswordPrompt && (
+              {gameStatus === 'failed' && (
                 <button
                   className="retry-button"
                   onClick={() => {
-                    setShowPasswordPrompt(true);
+                    setAttempts(prev => prev + 1);
+                  resetGame();
                   }}
                 >
                   ⏰ Time’s up! Press here to try again
