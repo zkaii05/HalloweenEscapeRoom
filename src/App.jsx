@@ -19,6 +19,7 @@ const TOTAL_TIME = 30; // seconds
 const TOTAL_DIFFERENCES = baseBoxes.length;
 const rightAnswer = 5
 const wrongAnswer = 2
+const gamePassword = import.meta.env.VITE_GAME_PASSWORD; // Vite
 
 function App() {
   const [clickedBoxes, setClickedBoxes] = useState([]);
@@ -32,7 +33,11 @@ function App() {
     setGameStatus('playing');
   };
   const [showIntro, setShowIntro] = useState(true);
-  const [clueRevealed, setClueRevealed] = useState(false);
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [showClue, setShowClue] = useState(false);
+  const [showClueVideo, setShowClueVideo] = useState(false);
 
   useEffect(() => {
     if (showIntro || gameStatus !== 'playing') return;
@@ -161,23 +166,89 @@ function App() {
             )}
 
             {gameStatus === 'won' && (
-              <div className="game-result success">
-                <img src="/success.jpeg" alt="You win!" className="success-image" />
-              </div>
-            )}
-  
-            {gameStatus === 'failed' && (
-              <button
-                className="retry-button"
-                onClick={() => {
-                  setAttempts(prev => prev + 1);
-                  resetGame();
-                }}
-              >
-                ⏰ Time’s up! Press here to try again
-              </button>
-            )}
-  
+                <div className="game-result success">
+                  <img src="/success.jpeg" alt="You win!" className="success-image" />
+                </div>
+              )}
+
+              {gameStatus === 'failed' && !showPasswordPrompt && (
+                <button
+                  className="retry-button"
+                  onClick={() => {
+                    setShowPasswordPrompt(true);
+                  }}
+                >
+                  ⏰ Time’s up! Press here to try again
+                </button>
+              )}
+
+              {showPasswordPrompt && (
+                <div className="password-prompt">
+                  <p>🔐 Enter 4-digit password to try again:</p>
+
+                  <div className="password-input-group">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={4}
+                      value={passwordInput}
+                      placeholder="Enter 4-digit password"
+                      className="password-input"
+                      onChange={(e) => {
+                        const digitsOnly = e.target.value.replace(/\D/g, ''); // remove non-digits
+                        setPasswordInput(digitsOnly);
+                        setPasswordError('');
+                      }}
+                    />
+                    <span className="digit-count">{4 - passwordInput.length} digits left</span>
+                  </div>
+
+                  <div className="password-actions">
+                    <button
+                      onClick={() => {
+                        if (passwordInput === gamePassword) {
+                          setShowPasswordPrompt(false);
+                          setPasswordInput('');
+                          setPasswordError('');
+                          setAttempts(prev => prev + 1);
+                          resetGame();
+                        } else {
+                          setPasswordError('❌ Incorrect password. Please try again.');
+                        }
+                      }}
+                    >
+                      ✅ Submit
+                    </button>
+
+                    <button
+                      className="clue-button"
+                      onClick={() => setShowClueVideo(true)}
+                    >
+                      💡 Clue
+                    </button>
+
+                    {/* Popup Video */}
+                    {showClueVideo && (
+                      <div className="clue-video-overlay">
+                        <div className="clue-video-container">
+                          <video
+                            autoPlay
+                            playsInline
+                            onEnded={() => setShowClueVideo(false)}
+                          >
+                            <source src="/videos/Retry Code Clue.mp4" type="video/mp4" />
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {passwordError && <p className="error">{passwordError}</p>}
+                </div>
+              )}
+
             {gameStatus === 'gameover' && (
               <div className="game-result fail">🚫 No more tries left. Please look for NPC for help.</div>
             )}
