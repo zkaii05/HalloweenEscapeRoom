@@ -95,6 +95,9 @@ body, html, #root {
   bottom: 100px;
   left: 50%;
   transform: translateX(-50%);
+  overflow: visible !important; /* <- ensure overflow is visible */
+  z-index: 10; /* ensures it's above other elements */
+
   }
 
 .indicator {
