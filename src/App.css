@@ -90,24 +90,6 @@ body, html, #root {
   margin-bottom: 20px; /* ← this adds spacing below the images */
 }
 
-.indicators {
-  position: absolute;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  overflow: visible !important; /* <- ensure overflow is visible */
-  z-index: 10; /* ensures it's above other elements */
-
-  }
-
-.indicator {
-  animation: float 1.2s ease-out forwards;
-  font-size: 2rem;
-  font-weight: bold;
-  opacity: 0;
-  position: absolute;
-}
-
 @keyframes float {
   0% {
     transform: translateY(0);
