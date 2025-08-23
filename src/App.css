@@ -3,6 +3,8 @@ body, html, #root {
   margin: 0;
   padding: 0;
   height: 100%;
+  background-color: black;
+  color: white; /* optional: makes text readable */
 }
 
 .main-grid {
@@ -16,12 +18,14 @@ body, html, #root {
   justify-content: space-between;
   height: 100%;
   overflow: visible; /* change this from hidden */
+  background: #000; /* black background */
 }
 
 .bottom-row {
   background-color: #f2f2f2;
   text-align: center;
   padding: 1rem;
+  background: black;
 }
 
 .timer-container {
@@ -32,6 +36,8 @@ body, html, #root {
   border-radius: 10px;
   overflow: hidden;
   position: relative;
+  background: black; /* instead of #ddd */
+  color: white;
 }
 
 .timer-bar {
@@ -55,7 +61,7 @@ body, html, #root {
   text-align: center;
   top: 0;
   font-size: clamp(18px, 1.8vw, 36px);
-  color: #333;
+  color: white;
   line-height: 1;
   pointer-events: none; /* makes sure clicks go through if needed */
 }
@@ -324,15 +330,117 @@ body, html, #root {
   z-index: 2000;
 }
 
+.password-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Clue video sits above password box */
 .clue-video-container {
+  width: 90%;
+  max-width: 800px;
   position: relative;
-  max-width: 80%;
-  max-height: 80%;
 }
 
 .clue-video-container video {
   width: 100%;
   height: auto;
+  display: block;
+}
+
+.try-again {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Password input feedback colors */
+.password-input.wrong-password {
+  background-color: #f8d7da;
+  border-color: #f5c2c7;
+}
+
+.password-input.correct-password {
+  background-color: #d1e7dd;
+  border-color: #badbcc;
+}
+
+.overlay-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: black;
-  pointer-events: none; /* disables interaction */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* Stack video above, password box below */
+.content-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px; /* spacing between video and prompt */
+  max-width: 90%;
+}
+
+/* Video */
+.clue-video-container {
+  max-width: 80%;
+  max-height: 50%;
+}
+.clue-video-container video {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+/* Password box */
+.password-prompt {
+  background: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  text-align: center;
+  min-width: 280px;
+  max-width: 400px;
+}
+
+/* Smaller input */
+.password-input {
+  font-size: 1.2rem;
+  width: 120px;
+  text-align: center;
+  margin-right: 10px;
+}
+
+.password-input.celebrate-password {
+  border: 2px solid #0f0;
+  animation: flashGreen 0.5s alternate 3;
+}
+
+@keyframes flashGreen {
+  from { background-color: #b8f9bb; }
+  to { background-color: #0f0; }
+}
+
+.password-input.wrong-password {
+  border: 2px solid #f00;
+  animation: flashRed 0.5s alternate 4;
+}
+
+@keyframes flashRed {
+  from { background-color: #df7474; }
+  to { background-color: #f00; }
 }
