@@ -21,8 +21,12 @@ const rightAnswer = 5
 const wrongAnswer = 2
 const gamePassword = import.meta.env.VITE_GAME_PASSWORD; // Vite
 const attempt = 2
+const video1 = "videos/Scare video 1.mp4"
+const video2 = "videos/Scare video 2.mp4"
 
 function App() {
+  const [tryAgainAttemptIndex, setTryAgainAttemptIndex] = useState(1);
+
   const [clickedBoxes, setClickedBoxes] = useState([]);
   const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
   const [gameStatus, setGameStatus] = useState('playing'); // 'playing', 'won', 'failed'
@@ -142,7 +146,7 @@ function App() {
           <div className="top-row">
             <ImageCell
               label="Left Image"
-              src="/image-left.jpg"
+              src="image-left.jpg"
               boxes={baseBoxes}
               clickedBoxes={clickedBoxes}
               onBoxClick={handleBoxClick}
@@ -150,7 +154,7 @@ function App() {
             />
             <ImageCell
               label="Right Image"
-              src="/image-right.jpg"
+              src="image-right.jpg"
               boxes={baseBoxes}
               clickedBoxes={clickedBoxes}
               onBoxClick={handleBoxClick}
@@ -175,14 +179,14 @@ function App() {
                         {ind.text}
                       </div>
                     ))}
+                    </div>
                   </div>
-                </div>
-              </>
-            )}
+                </>
+              )}
 
-            {gameStatus === 'won' && (
+              {gameStatus === 'won' && (
                 <div className="game-result success">
-                  <img src="/success.jpeg" alt="You win!" className="success-image" />
+                  <img src="success.jpeg" alt="You win!" className="success-image" />
                 </div>
               )}
 
@@ -212,7 +216,7 @@ function App() {
                           playsInline
                           onEnded={() => setVideoEnded(true)}
                         >
-                          <source src="/videos/Retry Code Clue.mp4" type="video/mp4" />
+                          <source src={video1} type="video/mp4" />
                           Your browser does not support the video tag.
                         </video>
 
@@ -221,16 +225,27 @@ function App() {
                             className="try-again"
                             onClick={() => {
                               setVideoEnded(false);
+
                               const video = document.getElementById("clueVideo");
+
                               if (video) {
-                                video.currentTime = 0;
-                                video.play();
-                              }
+                                if (tryAgainAttemptIndex === 1) {
+                                  video.src = video2;
+                                  video.load();
+                                  video.play();
+                                  setTryAgainAttemptIndex(2); // mark first try done
+                                } else {
+                                  video.src = video1;
+                                  video.load();
+                                  video.play();
+                                }
+                              }                              
                             }}
                           >
                             🔄 Try Again?
                           </button>
                         )}
+
                       </div>
                     )}
 
