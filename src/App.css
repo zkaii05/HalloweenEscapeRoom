@@ -398,11 +398,16 @@ body, html, #root {
 
 /* Video */
 .clue-video-container {
+  display: flex;
+  justify-content: center;  /* centers horizontally */
+  align-items: center;      /* centers vertically (if container taller than video) */
   max-width: 80%;
   max-height: 50%;
+  margin: 0 auto;           /* keeps container itself centered in parent */
 }
+
 .clue-video-container video {
-  width: 100%;
+  width: 80%;
   height: auto;
   border-radius: 8px;
 }
