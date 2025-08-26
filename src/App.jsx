@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import ImageCell from './components/ImageCell';
 import './App.css';
 
+// locating correct answers
 const baseBoxes = [
   { id: 1, top: '41%', left: '9%', width: '6%', height: '11%' },
   { id: 2, top: '35%', left: '33%', width: '20%', height: '14%' },
@@ -15,24 +16,33 @@ const baseBoxes = [
   { id: 9, top: '18%', left: '48%', width: '5%', height: '7%' },
 ];
 
+// Basic var
 const TOTAL_TIME = 30; // seconds
 const TOTAL_DIFFERENCES = baseBoxes.length;
 const rightAnswer = 5
 const wrongAnswer = 2
-const gamePassword = import.meta.env.VITE_GAME_PASSWORD; // Vite
+const gamePassword = import.meta.env.VITE_GAME_PASSWORD;
 const attempt = 2
+
+// Video
 const video1 = "videos/Scare video 1.mp4"
 const video2 = "videos/Scare video 2.mp4"
+
+// Audio
 const correctlySpotted = new Audio("audios/click_correct.mp3");
 const wronglySpotted = new Audio("audios/Wrong Attempt.wav");
 const timeIsUp = new Audio("audios/Time up.mp3");
 const bringAttentionToClueButton = new Audio("audios/clue button.WAV");
 const correctPasswordAudio = new Audio("audios/The Correct Answer.wav");
-const congratulationsButton = "audios/congratulation.WAV"
+const congratulationsButton = new Audio("audios/congratulation.WAV")
+
+// Background music
+const backgroundMusic = new Audio("audios/game_ambience.mp3");
+backgroundMusic.loop = true;
+backgroundMusic.volume = 0.5; // normal volume
 
 function App() {
   const [tryAgainAttemptIndex, setTryAgainAttemptIndex] = useState(1);
-
   const [clickedBoxes, setClickedBoxes] = useState([]);
   const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
   const [gameStatus, setGameStatus] = useState('playing'); // 'playing', 'won', 'failed'
@@ -50,6 +60,22 @@ function App() {
   const [showClueVideo, setShowClueVideo] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
 
+  // Helper: play sound effect with ducking
+  const playWithDucking = (sound, duckVolume = 0.1, restoreVolume = 0.5) => {
+    if (backgroundMusic) {
+      backgroundMusic.volume = duckVolume; // lower volume
+    }
+
+    sound.currentTime = 0;
+    sound.play();
+
+    sound.onended = () => {
+      if (backgroundMusic) {
+        backgroundMusic.volume = restoreVolume; // restore volume
+      }
+    };
+  };
+
   useEffect(() => {
     if (showIntro || gameStatus !== 'playing') return;
 
@@ -58,13 +84,11 @@ function App() {
         if (prev <= 1) {
           clearInterval(timer);
 
-          timeIsUp.currentTime = 0;
-          timeIsUp.play();
+          playWithDucking(timeIsUp);
           // wait 2 seconds before playing the clue button sound
           if (attempts === 1){
             setTimeout(() => {
-            bringAttentionToClueButton.currentTime = 0;
-            bringAttentionToClueButton.play();
+            playWithDucking(bringAttentionToClueButton);
           }, 1800);
           }
           
@@ -101,8 +125,7 @@ function App() {
       setTimeLeft(prev => Math.max(prev - wrongAnswer, 0));
       newIndicator('–2s', 'red', position);
       // Play wrong sound
-      wronglySpotted.currentTime = 0; // reset to start
-      wronglySpotted.play();
+      playWithDucking(wronglySpotted);
       return;
     }
 
@@ -116,8 +139,7 @@ function App() {
       });
       setTimeLeft(prev => Math.min(prev + rightAnswer, TOTAL_TIME));
       newIndicator('+5s', 'green', position);
-      correctlySpotted.currentTime = 0;
-      correctlySpotted.play();
+      playWithDucking(correctlySpotted);
     }
   };  
 
@@ -140,6 +162,7 @@ function App() {
             onClick={() => {
               resetGame();
               setShowIntro(false);
+              backgroundMusic.play(); // start looping music
             }}
           >
             ▶ Start Game
@@ -199,8 +222,7 @@ function App() {
                     alt="You win!"
                     className="success-image"
                     onLoad={() => {
-                      const audio = new Audio(congratulationsButton);
-                      audio.play();
+                      playWithDucking(congratulationsButton);
                     }}
                   />
                 </div>
@@ -230,7 +252,14 @@ function App() {
                           autoPlay
                           controls={false}
                           playsInline
-                          onEnded={() => setVideoEnded(true)}
+                          onPlay={() => {
+                            backgroundMusic.pause();   // stop bg music while video plays
+                          }}
+                          onEnded={() => {
+                            setVideoEnded(true);
+                            backgroundMusic.currentTime = 0; // restart from beginning
+                            backgroundMusic.play();          // resume bg music
+                          }}
                         >
                           <source src={video1} type="video/mp4" />
                           Your browser does not support the video tag.
@@ -290,6 +319,7 @@ function App() {
                       <div className="password-actions">
                         <button onClick={() => {
                           const correctPassword = gamePassword;
+                          console.log(correctPassword);
                           if (passwordInput === correctPassword) {
                             const video = document.getElementById("clueVideo");
                             if (video) {
@@ -298,19 +328,16 @@ function App() {
                               setShowClueVideo(false);
                             }
 
-                            correctPasswordAudio.currentTime = 0;
-                            correctPasswordAudio.play();
+                            playWithDucking(correctPasswordAudio);
 
                             setPasswordError("correct");
                             setTimeout(() => {
                               setShowPasswordPrompt(false);
-                              resetGame();
-                              setAttempts(attempts + 1);
+                              setGameStatus('won')
                             }, 3000);
                           } else {
                             setPasswordError("wrong");
-                            wronglySpotted.currentTime = 0;
-                            wronglySpotted.play();
+                            playWithDucking(wronglySpotted);
                           }
                         }}>
                           ✅ Submit
