@@ -23,6 +23,12 @@ const gamePassword = import.meta.env.VITE_GAME_PASSWORD; // Vite
 const attempt = 2
 const video1 = "videos/Scare video 1.mp4"
 const video2 = "videos/Scare video 2.mp4"
+const correctlySpotted = new Audio("audios/click_correct.mp3");
+const wronglySpotted = new Audio("audios/Wrong Attempt.wav");
+const timeIsUp = new Audio("audios/Time up.mp3");
+const bringAttentionToClueButton = new Audio("audios/clue button.WAV");
+const correctPasswordAudio = new Audio("audios/The Correct Answer.wav");
+const congratulationsButton = "audios/congratulation.WAV"
 
 function App() {
   const [tryAgainAttemptIndex, setTryAgainAttemptIndex] = useState(1);
@@ -41,22 +47,8 @@ function App() {
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const [showClue, setShowClue] = useState(false);
   const [showClueVideo, setShowClueVideo] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
-
-  const handleVideoEnd = () => {
-    setVideoEnded(true);
-  };
-
-  const handleRewatch = () => {
-    setVideoEnded(false);
-    const video = document.getElementById("clueVideo");
-    if (video) {
-      video.currentTime = 0;
-      video.play();
-    }
-  };
 
   useEffect(() => {
     if (showIntro || gameStatus !== 'playing') return;
@@ -65,6 +57,17 @@ function App() {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
+
+          timeIsUp.currentTime = 0;
+          timeIsUp.play();
+          // wait 2 seconds before playing the clue button sound
+          if (attempts === 1){
+            setTimeout(() => {
+            bringAttentionToClueButton.currentTime = 0;
+            bringAttentionToClueButton.play();
+          }, 1800);
+          }
+          
           setGameStatus(attempts + 1 < attempt + 1 ? 'failed' : 'gameover');
           return 0;
         }
@@ -94,9 +97,12 @@ function App() {
 
     // If it's explicitly marked wrong, show only red
     if (id === 'wrong') {
-      console.log('[WRONG] Clicked a wrong box at position:', position);
+      //console.log('[WRONG] Clicked a wrong box at position:', position);
       setTimeLeft(prev => Math.max(prev - wrongAnswer, 0));
       newIndicator('–2s', 'red', position);
+      // Play wrong sound
+      wronglySpotted.currentTime = 0; // reset to start
+      wronglySpotted.play();
       return;
     }
 
@@ -110,6 +116,8 @@ function App() {
       });
       setTimeLeft(prev => Math.min(prev + rightAnswer, TOTAL_TIME));
       newIndicator('+5s', 'green', position);
+      correctlySpotted.currentTime = 0;
+      correctlySpotted.play();
     }
   };  
 
@@ -186,7 +194,15 @@ function App() {
 
               {gameStatus === 'won' && (
                 <div className="game-result success">
-                  <img src="success.jpeg" alt="You win!" className="success-image" />
+                  <img
+                    src="success.jpeg"
+                    alt="You win!"
+                    className="success-image"
+                    onLoad={() => {
+                      const audio = new Audio(congratulationsButton);
+                      audio.play();
+                    }}
+                  />
                 </div>
               )}
 
@@ -197,11 +213,11 @@ function App() {
                     setShowPasswordPrompt(true);
                   }}
                 >
-                  ⏰ Time’s up! Press here to try again
+                  ⏰ Time’s up! Press here for clue to try again
                 </button>
               )}
 
-              {/* Password + Clue Section */}
+              { }
               {showPasswordPrompt && (
                 <div className="overlay-container">
 
@@ -281,6 +297,10 @@ function App() {
                               video.currentTime = 0;
                               setShowClueVideo(false);
                             }
+
+                            correctPasswordAudio.currentTime = 0;
+                            correctPasswordAudio.play();
+
                             setPasswordError("correct");
                             setTimeout(() => {
                               setShowPasswordPrompt(false);
@@ -289,6 +309,8 @@ function App() {
                             }, 3000);
                           } else {
                             setPasswordError("wrong");
+                            wronglySpotted.currentTime = 0;
+                            wronglySpotted.play();
                           }
                         }}>
                           ✅ Submit
