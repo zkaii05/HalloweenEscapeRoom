@@ -22,7 +22,7 @@ const TOTAL_DIFFERENCES = baseBoxes.length;
 const rightAnswer = 5
 const wrongAnswer = 2
 const gamePassword = import.meta.env.VITE_GAME_PASSWORD;
-const attempt = 2
+const attempt = 1
 
 // Video
 const video1 = "videos/Scare video 1.mp4"
