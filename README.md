@@ -13,3 +13,4 @@ If you are developing a production application, we recommend using TypeScript wi
 
 Things to do:
 1. download 2 videos from whatsapp and name them Scare video 1 and Scare video 2.mp4
+2. if you change env file, close website and reopen
