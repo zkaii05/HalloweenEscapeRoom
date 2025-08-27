@@ -23,4 +23,3 @@ dist-ssr
 *.sln
 *.sw?
 public/videos
-*public/audios
