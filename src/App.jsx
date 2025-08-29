@@ -92,7 +92,7 @@ function App() {
           }, 1800);
           }
           
-          setGameStatus(attempts + 1 < attempt + 1 ? 'failed' : 'gameover');
+          setGameStatus(attempts < attempt + 1 ? 'failed' : 'gameover');
           return 0;
         }
         return prev - 1;
