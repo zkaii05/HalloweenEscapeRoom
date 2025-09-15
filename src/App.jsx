@@ -18,7 +18,7 @@ const baseBoxes = [
 
 // Basic var
 const TOTAL_TIME = 30; // seconds
-const TOTAL_DIFFERENCES = baseBoxes.length;
+const TOTAL_DIFFERENCES = baseBoxes.length + 1;
 const rightAnswer = 5
 const wrongAnswer = 2
 const gamePassword = import.meta.env.VITE_GAME_PASSWORD;
@@ -143,8 +143,8 @@ function App() {
         const updated = [...prev, id];
         return updated;
       });
-      setTimeLeft(prev => Math.min(prev + rightAnswer, TOTAL_TIME));
-      newIndicator('+5s', 'green', position);
+      setTimeLeft(prev => Math.min(prev , TOTAL_TIME));
+      // newIndicator('+5s', 'green', position);
       playWithDucking(correctlySpotted);
     }
   };
@@ -159,8 +159,7 @@ function App() {
           <p>You have {attempt} tries to spot all {TOTAL_DIFFERENCES} differences between the two images.</p>
           <ul>
             <li>Click on areas you think are different.</li>
-            <li>Correct click: +5 seconds</li>
-            <li>Wrong click: -2 seconds</li>
+            <li>Note: Wrong click: -2 seconds</li>
             <li>You have {TOTAL_TIME} seconds per attempt.</li>
           </ul>
           <button
