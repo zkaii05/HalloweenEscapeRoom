@@ -4,7 +4,36 @@ body, html, #root {
   padding: 0;
   height: 100%;
   background-color: black;
-  color: white; /* optional: makes text readable */
+  color: white;
+}
+
+.image-cell, .image-wrapper {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: black;   /* force fill background */
+  width: 100%;
+  height: 100%;
+}
+.image-wrapper {
+  position: relative;
+}
+
+.game-image {
+  display: block;   /* removes inline gap */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;   /* fill container, may crop */
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: black;   /* fallback if image is smaller */
+}
+
+.click-box {
+  position: absolute;   /* must be positioned relative to wrapper */
+  border: 2px solid transparent; /* no border unless highlighted */
+  background: transparent;
 }
 
 .main-grid {
@@ -14,11 +43,19 @@ body, html, #root {
 }
 
 .top-row {
+  flex: 1;
   display: flex;
-  justify-content: space-between;
-  height: 100%;
-  overflow: visible; /* change this from hidden */
-  background: #000; /* black background */
+  flex-direction: row;
+  overflow: hidden;
+  margin-bottom: 0;    /* remove the extra spacing */
+  background: black;   /* ensures filler is black */
+}
+
+img {
+  display: block;  /* removes inline gap */
+  border: none;
+  margin: 0;
+  padding: 0;
 }
 
 .bottom-row {
@@ -93,9 +130,21 @@ body, html, #root {
   display: flex;
   flex-direction: row;
   overflow: hidden;
-  margin-bottom: 20px; /* ← this adds spacing below the images */
+  margin-bottom: 0;   /* no gap */
+  background: black;  /* ensures fill is black */
 }
 
+
+.top-row img {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: none;
+  width: 100%; /* stretch horizontally */
+  height: 100%; /* stretch vertically */
+  object-fit: contain;
+  background: black;
+}
 @keyframes float {
   0% {
     transform: translateY(0);
@@ -448,4 +497,34 @@ body, html, #root {
 @keyframes flashRed {
   from { background-color: #df7474; }
   to { background-color: #f00; }
+}
+
+.overlay-video {
+  position: fixed;     /* always on top of screen */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: transparent; /* no background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;       /* ensure it’s above all other elements */
+}
+
+.top-row-wrapper {
+  position: relative;   /* makes it the positioning context */
+}
+
+.overlay-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;         /* match .top-row size */
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;         /* above the images */
+  pointer-events: none; /* allows clicks to pass through if you want */
 }

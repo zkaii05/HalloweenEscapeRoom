@@ -27,12 +27,12 @@ const attempt = 1
 // Video
 const video1 = "videos/Scare video 1.mp4"
 const video2 = "videos/Scare video 2.mp4"
+const video3 = "videos/Scary_girl.mp4"
 
 // Audio
 const correctlySpotted = new Audio("audios/click_correct.mp3");
 const wronglySpotted = new Audio("audios/Wrong Attempt.wav");
 const timeIsUp = new Audio("audios/Time up.mp3");
-const bringAttentionToClueButton = new Audio("audios/clue button.WAV");
 const correctPasswordAudio = new Audio("audios/The Correct Answer.wav");
 const congratulationsButton = new Audio("audios/congratulation.WAV")
 
@@ -57,8 +57,14 @@ function App() {
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordError, setPasswordError] = useState('');
+
+  // video for morse code
   const [showClueVideo, setShowClueVideo] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
+
+  // video after time eds
+  const [overlayVideo, setOverlayVideo] = useState(null); // null or video source
+  const [overlayVisible, setOverlayVisible] = useState(false);
 
   // Helper: play sound effect with ducking
   const playWithDucking = (sound, duckVolume = 0.1, restoreVolume = 0.5) => {
@@ -86,12 +92,12 @@ function App() {
 
           playWithDucking(timeIsUp);
           // wait 2 seconds before playing the clue button sound
-          if (attempts === 1){
+          if (attempts === 1) {
             setTimeout(() => {
-            playWithDucking(bringAttentionToClueButton);
-          }, 1800);
+              setOverlayVideo(video3);
+            }, 1800);
           }
-          
+
           setGameStatus(attempts < attempt + 1 ? 'failed' : 'gameover');
           return 0;
         }
@@ -141,7 +147,7 @@ function App() {
       newIndicator('+5s', 'green', position);
       playWithDucking(correctlySpotted);
     }
-  };  
+  };
 
   const progressPercent = (timeLeft / TOTAL_TIME) * 100;
 
@@ -173,26 +179,71 @@ function App() {
           <div className="headspace">
             <p>Tries used: {attempts} / {attempt}</p>
           </div>
-  
-          <div className="top-row">
-            <ImageCell
-              label="Left Image"
-              src="image-left.jpg"
-              boxes={baseBoxes}
-              clickedBoxes={clickedBoxes}
-              onBoxClick={handleBoxClick}
-              indicators={indicators}
-            />
-            <ImageCell
-              label="Right Image"
-              src="image-right.jpg"
-              boxes={baseBoxes}
-              clickedBoxes={clickedBoxes}
-              onBoxClick={handleBoxClick}
-              indicators={indicators}
-            />
-          </div>
-  
+          <div className="top-row-wrapper">
+            <div className="top-row">
+              <ImageCell
+                label="Left Image"
+                src="image-left.jpg"
+                boxes={baseBoxes}
+                clickedBoxes={clickedBoxes}
+                onBoxClick={handleBoxClick}
+                indicators={indicators}
+              />
+              <ImageCell
+                label="Right Image"
+                src="image-right.jpg"
+                boxes={baseBoxes}
+                clickedBoxes={clickedBoxes}
+                onBoxClick={handleBoxClick}
+                indicators={indicators}
+              />
+            </div>
+
+              {overlayVideo && (
+                <div
+                  className="overlay-video"
+                  style={{
+                    opacity: overlayVisible ? 0.7 : 0,
+                    transition: "opacity 1s ease-in-out", // smooth fade
+                    width: "100%",
+                    height: "100%",
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                  }}
+                >
+                  <video
+                    id="overlayVideoElement"
+                    autoPlay
+                    playsInline
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    onPlay={(e) => {
+                      backgroundMusic.pause();
+                      setOverlayVisible(true); // fade in
+                    }}
+                    onTimeUpdate={(e) => {
+                      const videoEl = e.currentTarget;
+                      if (videoEl.duration && videoEl.currentTime >= videoEl.duration - 1.5) {
+                        if (overlayVisible) {
+                          setOverlayVisible(false); // fade out
+                        }
+                      }
+                    }}
+                    onEnded={() => {
+                      setOverlayVideo(null); // remove video after fade
+                      backgroundMusic.play();
+                    }}
+                  >
+                    <source src={overlayVideo} type="video/mp4" />
+                  </video>
+                </div>
+              )}
+            </div>
+
           <div className="bottom-row">
             {gameStatus === 'playing' && (
               <>
@@ -210,142 +261,142 @@ function App() {
                         {ind.text}
                       </div>
                     ))}
-                    </div>
                   </div>
-                </>
-              )}
-
-              {gameStatus === 'won' && (
-                <div className="game-result success">
-                  <img
-                    src="success.jpeg"
-                    alt="You win!"
-                    className="success-image"
-                    onLoad={() => {
-                      playWithDucking(congratulationsButton);
-                    }}
-                  />
                 </div>
-              )}
+              </>
+            )}
 
-              {gameStatus === 'failed' && !showPasswordPrompt && (
-                <button
-                  className="retry-button"
-                  onClick={() => {
-                    setShowPasswordPrompt(true);
+            {gameStatus === 'won' && (
+              <div className="game-result success">
+                <img
+                  src="success.jpeg"
+                  alt="You win!"
+                  className="success-image"
+                  onLoad={() => {
+                    playWithDucking(congratulationsButton);
                   }}
-                >
-                  ⏰ Time’s up! Press here for clue to try again
-                </button>
-              )}
+                />
+              </div>
+            )}
 
-              { }
-              {showPasswordPrompt && (
-                <div className="overlay-container">
+            {gameStatus === 'failed' && !showPasswordPrompt && (
+              <button
+                className="retry-button"
+                onClick={() => {
+                  setShowPasswordPrompt(true);
+                }}
+              >
+                ⏰ Time’s up! Press here for clue to try again
+              </button>
+            )}
 
-                  <div className="content-stack">
-                    {/* Clue Video (appears above password prompt, not overlapping) */}
-                    {showClueVideo && (
-                      <div className="clue-video-container">
-                        <video
-                          id="clueVideo"
-                          autoPlay
-                          controls={false}
-                          playsInline
-                          onPlay={() => {
-                            backgroundMusic.pause();   // stop bg music while video plays
-                          }}
-                          onEnded={() => {
-                            setVideoEnded(true);
-                            backgroundMusic.currentTime = 0; // restart from beginning
-                            backgroundMusic.play();          // resume bg music
+            { }
+            {showPasswordPrompt && (
+              <div className="overlay-container">
+
+                <div className="content-stack">
+                  {/* Clue Video (appears above password prompt, not overlapping) */}
+                  {showClueVideo && (
+                    <div className="clue-video-container">
+                      <video
+                        id="clueVideo"
+                        autoPlay
+                        controls={false}
+                        playsInline
+                        onPlay={() => {
+                          backgroundMusic.pause();   // stop bg music while video plays
+                        }}
+                        onEnded={() => {
+                          setVideoEnded(true);
+                          backgroundMusic.currentTime = 0; // restart from beginning
+                          backgroundMusic.play();          // resume bg music
+                        }}
+                      >
+                        <source src={video1} type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+
+                      {videoEnded && (
+                        <button
+                          className="try-again"
+                          onClick={() => {
+                            setVideoEnded(false);
+
+                            const video = document.getElementById("clueVideo");
+
+                            if (video) {
+                              if (tryAgainAttemptIndex === 1) {
+                                video.src = video2;
+                                video.load();
+                                video.play();
+                                setTryAgainAttemptIndex(2); // mark first try done
+                              } else {
+                                video.src = video1;
+                                video.load();
+                                video.play();
+                              }
+                            }
                           }}
                         >
-                          <source src={video1} type="video/mp4" />
-                          Your browser does not support the video tag.
-                        </video>
-
-                        {videoEnded && (
-                          <button
-                            className="try-again"
-                            onClick={() => {
-                              setVideoEnded(false);
-
-                              const video = document.getElementById("clueVideo");
-
-                              if (video) {
-                                if (tryAgainAttemptIndex === 1) {
-                                  video.src = video2;
-                                  video.load();
-                                  video.play();
-                                  setTryAgainAttemptIndex(2); // mark first try done
-                                } else {
-                                  video.src = video1;
-                                  video.load();
-                                  video.play();
-                                }
-                              }                              
-                            }}
-                          >
-                            🔄 Try Again?
-                          </button>
-                        )}
-
-                      </div>
-                    )}
-
-                    {/* Password Box (centered when alone, pushed down if video appears) */}
-                    <div className="password-prompt">
-                      <p>🔐 Enter 4-digit password:</p>
-                      <div className="password-input-group">
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          maxLength={4}
-                          className={`password-input ${passwordError === "wrong" ? "wrong-password" :
-                              passwordError === "correct" ? "celebrate-password" : ""
-                            }`}
-                          value={passwordInput}
-                          placeholder="Enter 4-digit password"
-                          onChange={(e) => {
-                            const digitsOnly = e.target.value.replace(/\D/g, '');
-                            setPasswordInput(digitsOnly);
-                            setPasswordError('');
-                          }}
-                        />
-                        <span className="digit-count">{4 - passwordInput.length} digits left</span>
-                      </div>
-
-                      <div className="password-actions">
-                        <button onClick={() => {
-                          const correctPassword = gamePassword;
-                          console.log(correctPassword);
-                          if (passwordInput === correctPassword) {
-                            const video = document.getElementById("clueVideo");
-                            if (video) {
-                              video.pause();
-                              video.currentTime = 0;
-                              setShowClueVideo(false);
-                            }
-
-                            playWithDucking(correctPasswordAudio);
-
-                            setPasswordError("correct");
-                            setTimeout(() => {
-                              setShowPasswordPrompt(false);
-                              setGameStatus('won')
-                            }, 3000);
-                          } else {
-                            setPasswordError("wrong");
-                            playWithDucking(wronglySpotted);
-                          }
-                        }}>
-                          ✅ Submit
+                          🔄 Try Again?
                         </button>
+                      )}
 
-                        <button className="clue-button" onClick={() => {
-                          setShowClueVideo(true);
-                          setVideoEnded(false);
+                    </div>
+                  )}
+
+                  {/* Password Box (centered when alone, pushed down if video appears) */}
+                  <div className="password-prompt">
+                    <p>🔐 Enter 4-digit password:</p>
+                    <div className="password-input-group">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={4}
+                        className={`password-input ${passwordError === "wrong" ? "wrong-password" :
+                          passwordError === "correct" ? "celebrate-password" : ""
+                          }`}
+                        value={passwordInput}
+                        placeholder="Enter 4-digit password"
+                        onChange={(e) => {
+                          const digitsOnly = e.target.value.replace(/\D/g, '');
+                          setPasswordInput(digitsOnly);
+                          setPasswordError('');
+                        }}
+                      />
+                      <span className="digit-count">{4 - passwordInput.length} digits left</span>
+                    </div>
+
+                    <div className="password-actions">
+                      <button onClick={() => {
+                        const correctPassword = gamePassword;
+                        console.log(correctPassword);
+                        if (passwordInput === correctPassword) {
+                          const video = document.getElementById("clueVideo");
+                          if (video) {
+                            video.pause();
+                            video.currentTime = 0;
+                            setShowClueVideo(false);
+                          }
+
+                          playWithDucking(correctPasswordAudio);
+
+                          setPasswordError("correct");
+                          setTimeout(() => {
+                            setShowPasswordPrompt(false);
+                            setGameStatus('won')
+                          }, 3000);
+                        } else {
+                          setPasswordError("wrong");
+                          playWithDucking(wronglySpotted);
+                        }
+                      }}>
+                        ✅ Submit
+                      </button>
+
+                      <button className="clue-button" onClick={() => {
+                        setShowClueVideo(true);
+                        setVideoEnded(false);
                       }}>
                         💡 Clue
                       </button>
