@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ImageCell from './components/ImageCell';
 import './App.css';
 
@@ -28,6 +28,7 @@ const attempt = 1
 const video1 = "videos/Scare video 1.mp4"
 const video2 = "videos/Scare video 2.mp4"
 const video3 = "videos/Scary_girl.mp4"
+const video4 = "videos/horror_scare.mp4"
 
 // Audio
 const correctlySpotted = new Audio("audios/click_correct.mp3");
@@ -65,6 +66,10 @@ function App() {
   // video after time eds
   const [overlayVideo, setOverlayVideo] = useState(null); // null or video source
   const [overlayVisible, setOverlayVisible] = useState(false);
+
+  // additional scare video
+  const [extraOverlayVideo, setExtraOverlayVideo] = useState(null);
+  const clueVideoRef = useRef(null);
 
   // Helper: play sound effect with ducking
   const playWithDucking = (sound, duckVolume = 0.1, restoreVolume = 0.5) => {
@@ -293,50 +298,85 @@ function App() {
             {showPasswordPrompt && (
               <div className="overlay-container">
 
-                <div className="content-stack">
-                  {/* Clue Video (appears above password prompt, not overlapping) */}
-                  {showClueVideo && (
-                    <div className="clue-video-container">
-                      <video
-                        id="clueVideo"
-                        autoPlay
-                        controls={false}
-                        playsInline
-                        onPlay={() => {
-                          backgroundMusic.pause();   // stop bg music while video plays
-                        }}
-                        onEnded={() => {
-                          setVideoEnded(true);
-                          backgroundMusic.currentTime = 0; // restart from beginning
-                          backgroundMusic.play();          // resume bg music
-                        }}
-                      >
-                        <source src={video1} type="video/mp4" />
-                        Your browser does not support the video tag.
-                      </video>
-
-                      {videoEnded && (
-                        <button
-                          className="try-again"
-                          onClick={() => {
-                            setVideoEnded(false);
-
-                            const video = document.getElementById("clueVideo");
-
-                            if (video) {
-                              if (tryAgainAttemptIndex === 1) {
-                                video.src = video2;
-                                video.load();
-                                video.play();
-                                setTryAgainAttemptIndex(2); // mark first try done
-                              } else {
-                                video.src = video1;
-                                video.load();
-                                video.play();
-                              }
-                            }
+              <div className="content-stack">
+                {/* Clue Video (appears above password prompt, not overlapping) */}
+                {showClueVideo && (
+                  <div className="clue-video-container" style={{ position: "relative" }}>
+                        <video
+                          ref={clueVideoRef}
+                          id="clueVideo"
+                          autoPlay
+                          controls={false}
+                          playsInline
+                          onPlay={() => {
+                            backgroundMusic.pause();
+                          }}
+                          onEnded={() => {
+                            setVideoEnded(true);
+                            backgroundMusic.currentTime = 0;
+                            backgroundMusic.play();
                           }}
                         >
+                          <source src={video1} type="video/mp4" />
+                        </video>
+
+                        {/* Overlay Video4 */}
+                        {extraOverlayVideo && (
+                          <div
+                            style={{
+                              position: "fixed",
+                              top: 0,
+                              left: 0,
+                              width: "100vw",
+                              height: "100vh",
+                              backgroundColor: "black",
+                              zIndex: 9999,
+                            }}
+                          >
+                            <video
+                              autoPlay
+                              playsInline
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                              onEnded={() => setExtraOverlayVideo(null)}
+                            >
+                              <source src={video4} type="video/mp4" />
+                            </video>
+                          </div>
+                        )}
+
+                        {videoEnded && (
+                          <button
+                            className="try-again"
+                            onClick={() => {
+                              setVideoEnded(false);
+
+                              const video = clueVideoRef.current;
+
+                              if (video) {
+                                if (tryAgainAttemptIndex === 1) { 
+                                  video.src = video2;
+                                  video.load();
+                                  video.play();
+
+                                  setTimeout(() => {
+                                    setExtraOverlayVideo(video4);
+                                  }, 29280);
+
+                                  setTryAgainAttemptIndex(2);
+                                } else {
+                                  video.src = video1;
+                                  video.load();
+                                  video.play();
+                                  setExtraOverlayVideo(null);
+                                }                                
+                              }
+
+                            }}
+                          >
                           🔄 Try Again?
                         </button>
                       )}
@@ -346,7 +386,7 @@ function App() {
 
                   {/* Password Box (centered when alone, pushed down if video appears) */}
                   <div className="password-prompt">
-                    <p>🔐 Enter 4-digit password:</p>
+                    <p>Enter 4-digit password:</p>
                     <div className="password-input-group">
                       <input
                         type="text"
