@@ -36,6 +36,7 @@ const wronglySpotted = new Audio("audios/Wrong Attempt.wav");
 const timeIsUp = new Audio("audios/Time up.mp3");
 const correctPasswordAudio = new Audio("audios/The Correct Answer.wav");
 const congratulationsButton = new Audio("audios/congratulation.WAV")
+const scream = new Audio ("audios/Female Terror Scream 1.mp3")
 
 // Background music
 const backgroundMusic = new Audio("audios/game_ambience.mp3");
@@ -71,6 +72,37 @@ function App() {
   const [extraOverlayVideo, setExtraOverlayVideo] = useState(null);
   const clueVideoRef = useRef(null);
 
+  // scare after morse code once
+  const [showLoading, setShowLoading] = useState(false);
+  const [playVideo4, setPlayVideo4] = useState(false);
+
+  // red button after spot the difference
+  const [showRetryButton, setShowRetryButton] = useState(false);
+
+  // clue button in morse code
+  const [clueUsed, setClueUsed] = useState(false);
+
+  useEffect(() => {
+    // Try to autoplay when site loads
+    const playMusic = () => {
+      backgroundMusic
+        .play()
+        .then(() => {
+          console.log("Background music started on load");
+        })
+        .catch((err) => {
+          console.log("Autoplay blocked by browser, will start on first click", err);
+          // Optional: you could show a 🔊 "Unmute" button if autoplay is blocked
+        });
+    };
+  
+    playMusic();
+  
+    return () => {
+      backgroundMusic.pause();
+    };
+  }, []);  
+
   // Helper: play sound effect with ducking
   const playWithDucking = (sound, duckVolume = 0.1, restoreVolume = 0.5) => {
     if (backgroundMusic) {
@@ -100,6 +132,14 @@ function App() {
           if (attempts === 1) {
             setTimeout(() => {
               setOverlayVideo(video3);
+
+              // Reset button state
+              setShowRetryButton(false);
+              gameStatus === 'failed' 
+              // Show retry button after 10s
+              setTimeout(() => {
+                setShowRetryButton(true);
+              }, 4320);
             }, 1800);
           }
 
@@ -172,7 +212,6 @@ function App() {
             onClick={() => {
               resetGame();
               setShowIntro(false);
-              backgroundMusic.play(); // start looping music
             }}
           >
             ▶ Start Game
@@ -275,26 +314,57 @@ function App() {
                 <img
                   src="success.jpeg"
                   alt="You win!"
-                  className="success-image"
-                  onLoad={() => {
-                    playWithDucking(congratulationsButton);
+                    className="success-image"
+                    onLoad={() => {
+                      playWithDucking(congratulationsButton);
+                    }}
+                  />
+                </div>
+              )}
+
+              {gameStatus === 'failed' && !showPasswordPrompt && showRetryButton && (
+                <button
+                  className="retry-button"
+                  onClick={() => {
+                    setShowPasswordPrompt(true);
                   }}
-                />
-              </div>
-            )}
+                >
+                  ⏰ Time’s up! Press here for clue to try again
+                </button>
+              )}
 
-            {gameStatus === 'failed' && !showPasswordPrompt && (
-              <button
-                className="retry-button"
-                onClick={() => {
-                  setShowPasswordPrompt(true);
-                }}
-              >
-                ⏰ Time’s up! Press here for clue to try again
-              </button>
-            )}
+              {/* Loading spinner */}
+              {showLoading && (
+                <div className="loading-overlay">
+                  <div className="spinner"></div>
+                  <p>Loading...</p>
+                </div>
+              )}
 
-            { }
+              {/* Video4 */}
+              {playVideo4 && (
+                <div className="overlay-video">
+                  <video
+                    id="video4"
+                    autoPlay
+                    controls={false}
+                    playsInline
+                    onPlay={() => {
+                      backgroundMusic.pause(); // pause bg music
+                    }}
+                    onEnded={() => {
+                      setPlayVideo4(false);   // hide video after finish
+                      backgroundMusic.currentTime = 0;
+                      backgroundMusic.play(); // resume bg music
+                    }}
+                  >
+                    <source src={video4} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              )}
+
+              { }
             {showPasswordPrompt && (
               <div className="overlay-container">
 
@@ -421,10 +491,26 @@ function App() {
                           playWithDucking(correctPasswordAudio);
 
                           setPasswordError("correct");
-                          setTimeout(() => {
-                            setShowPasswordPrompt(false);
+
+                          if (tryAgainAttemptIndex === 1) {
+                            setTimeout(() => {
+                              setShowPasswordPrompt(false);
+                            }, 3000);
+                            setShowLoading(true);   // show spinner
+                            setPlayVideo4(false);   // make sure video not yet playing
+
+                            setTimeout(() => {
+                              setShowLoading(false);  // hide spinner after 5s
+                              setPlayVideo4(true);    // play video4
+                              playWithDucking(scream)
+                            }, 8000);
                             setGameStatus('won')
-                          }, 3000);
+                          } else {
+                            setTimeout(() => {
+                              setGameStatus('won')
+                              setShowPasswordPrompt(false);
+                            }, 3000);
+                          }
                         } else {
                           setPasswordError("wrong");
                           playWithDucking(wronglySpotted);
@@ -432,13 +518,18 @@ function App() {
                       }}>
                         ✅ Submit
                       </button>
-
-                      <button className="clue-button" onClick={() => {
-                        setShowClueVideo(true);
-                        setVideoEnded(false);
-                      }}>
-                        💡 Clue
-                      </button>
+                        {!clueUsed && (
+                          <button
+                            className="clue-button"
+                            onClick={() => {
+                              setShowClueVideo(true);
+                              setVideoEnded(false);
+                              setClueUsed(true);   // hide clue button after press
+                            }}
+                          >
+                            💡 Clue
+                          </button>
+                        )}
                     </div>
                   </div>
                 </div>
