@@ -5,15 +5,11 @@ import './App.css';
 
 // locating correct answers
 const baseBoxes = [
-  { id: 1, top: '41%', left: '9%', width: '6%', height: '11%' },
-  { id: 2, top: '35%', left: '33%', width: '20%', height: '14%' },
-  { id: 3, top: '44%', left: '52%', width: '5%', height: '9%' },
-  { id: 4, top: '49%', left: '74%', width: '20%', height: '14%' },
-  { id: 5, top: '85%', left: '38%', width: '10%', height: '14%' },
-  { id: 6, top: '77%', left: '4%', width: '6%', height: '9%' },
-  { id: 7, top: '62.5%', left: '16%', width: '5%', height: '10%' },
-  { id: 8, top: '86%', left: '69%', width: '6%', height: '9%' },
-  { id: 9, top: '18%', left: '48%', width: '5%', height: '7%' },
+  { id: 1, top: '63%', left: '24%', width: '4.5%', height: '6%' },
+  { id: 2, top: '94.5%', left: '72%', width: '15%', height: '10%' },
+  { id: 3, top: '94.5%', left: '18.5%', width: '5%', height: '9%' },
+  { id: 4, top: '32.5%', left: '84.5%', width: '3%', height: '5%' },
+  { id: 5, top: '73%', left: '92.6%', width: '14%', height: '14%' },
 ];
 
 // Basic var
